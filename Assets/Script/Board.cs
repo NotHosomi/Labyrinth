@@ -12,7 +12,7 @@ public class Board : MonoBehaviour
     public int size2 = 49;
     Tile extraTile;
     Tile[] tiles;
-    // Start is called before the first frame update
+
     void Awake()
     {
         Tile.board = this;
@@ -163,19 +163,19 @@ public class Board : MonoBehaviour
     public void insertDown(int col)
     {
         Tile buffer = tiles[getIndexFromPos(col, 0)];
-        for (int i = getIndexFromPos(col, 0); i < getIndexFromPos(col, size-1); ++i)
+        for (int i = getIndexFromPos(col, 0); i < getIndexFromPos(col, size-1); i += size)
         {
-            tiles[i] = tiles[i + 1];
+            tiles[i] = tiles[i + size];
         }
-        extraTile.transform.position = new Vector3(col, 6.7f, 0);
+        extraTile.transform.position = new Vector3(col, 7 - Inserter.nudge_dist, 0);
         extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(col, size-1)] = extraTile;
         extraTile = buffer;
 
-        List<Tile> slice = getRow(col);
+        List<Tile> slice = getCol(col);
         foreach (Tile t in slice)
         {
-            t.slide(2, 0.7f);
+            t.slide(2, 1 - Inserter.nudge_dist);
         }
         extraTile.exitSlide(2);
 
@@ -188,21 +188,23 @@ public class Board : MonoBehaviour
     public void insertUp(int col)
     {
         Tile buffer = tiles[getIndexFromPos(col, size - 1)];
-        for (int i = getIndexFromPos(col, size-1); i > getIndexFromPos(col, 0); --i)
+        for (int i = getIndexFromPos(col, size-1); i > getIndexFromPos(col, 0); i -= size)
         {
-            tiles[i] = tiles[i - 1];
+            tiles[i] = tiles[i - size];
+            Debug.Log("i=" + i + " " + getPosFromIndex(i));
         }
-        extraTile.transform.position = new Vector3(col, -0.7f, 0);
+        extraTile.transform.position = new Vector3(col, -1 + Inserter.nudge_dist, 0);
         extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(col, 0)] = extraTile;
         extraTile = buffer;
 
-        List<Tile> slice = getRow(col);
+        List<Tile> slice = getCol(col);
         foreach (Tile t in slice)
         {
-            t.slide(0, 0.7f);
+            t.slide(0, 1 - Inserter.nudge_dist);
         }
         extraTile.exitSlide(0);
+        extraTile.transform.position = new Vector3(-2, 3, 0);
     }
     public void insertRight(int row)
     {
@@ -211,7 +213,7 @@ public class Board : MonoBehaviour
         {
             tiles[i] = tiles[i -1];
         }
-        extraTile.transform.position = new Vector3(-0.7f, row, 0);
+        extraTile.transform.position = new Vector3(-1 + Inserter.nudge_dist, row, 0);
         extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(0, row)] = extraTile;
         extraTile = buffer;
@@ -219,7 +221,7 @@ public class Board : MonoBehaviour
         List<Tile> slice = getRow(row);
         foreach (Tile t in slice)
         {
-            t.slide(1, 0.7f);
+            t.slide(1, 1 - Inserter.nudge_dist);
         }
         extraTile.exitSlide(1);
 
@@ -237,7 +239,7 @@ public class Board : MonoBehaviour
         {
             tiles[i] = tiles[i + 1];
         }
-        extraTile.transform.position = new Vector3(6.7f, row, 0);
+        extraTile.transform.position = new Vector3(7 - Inserter.nudge_dist, row, 0);
         extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(size - 1, row)] = extraTile;
         extraTile = buffer;
@@ -245,7 +247,7 @@ public class Board : MonoBehaviour
         List<Tile> slice = getRow(row);
         foreach (Tile t in slice)
         {
-            t.slide(3, 0.7f);
+            t.slide(3, 1 - Inserter.nudge_dist);
         }
         extraTile.exitSlide(3);
 
@@ -255,4 +257,25 @@ public class Board : MonoBehaviour
         //      pos.x = 0
         //   p.transform.position = pos;
     }
+
+    public List<Tile> pathable;
+    public void navReset(Tile origin)
+    {
+        List<Tile> pathable = new List<Tile>();
+        foreach (Tile t in tiles)
+        {
+            t.nav_checked = false;
+            t.navigable = false;
+        }
+        // add navigable tiles to nav calc somewhere
+        // find them thru iter
+        // or add them on discovery
+        origin.navCalc();
+        foreach (Tile t in tiles)
+        {
+            if (t.navigable)
+                pathable.Add(t);
+        }
+    }
+
 }

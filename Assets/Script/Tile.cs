@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public int debug_id;
     public static Board board;
     public bool[] connections; // NESW
 
@@ -59,6 +58,7 @@ public class Tile : MonoBehaviour
     public void navCalc()
     {
         navigable = true;
+        board.pathable.Add(this);
         navCalcDir(transform.position.x, transform.position.y + 1, 0);
         navCalcDir(transform.position.x + 1, transform.position.y, 1);
         navCalcDir(transform.position.x, transform.position.y - 1, 2);

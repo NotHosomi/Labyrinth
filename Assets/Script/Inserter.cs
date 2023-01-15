@@ -9,22 +9,30 @@ public class Inserter : MonoBehaviour
     [SerializeField] int dir;
     [SerializeField] int pos;
     public bool disabled;
+    [SerializeField] Inserter opposite;
 
-    static Inserter prev_inactive = null;
+    public static Inserter current_inactive = null;
+    public static List<Inserter> inserters;
+
+    public static float nudge_dist = 0.25f;
+
+    public void Start()
+    {
+        inserters.Add(this);
+    }
 
     public void OnClick()
     {
         if (disabled)
             return;
-        disabled = true;
-        GetComponent<Image>().color = Color.gray;
+        opposite.disabled = true;
+        opposite.GetComponent<Image>().color = Color.gray;
 
-        if (prev_inactive != null)
+        if (current_inactive != null)
         {
-            prev_inactive.disabled = false;
-            prev_inactive.GetComponent<Image>().color = Color.red;
+            current_inactive.GetComponent<Image>().color = Color.red;
         }
-        prev_inactive = this;
+        current_inactive = opposite;
 
         switch (dir)
         {
@@ -41,6 +49,10 @@ public class Inserter : MonoBehaviour
                 Tile.board.insertLeft(Mathf.RoundToInt(transform.position.y));
                 break;
         }
+
+        foreach (Inserter i in inserters)
+            i.disabled = true;
+        GM.gm.onTilePlace();
     }
 
     public void OnHover()
@@ -55,8 +67,11 @@ public class Inserter : MonoBehaviour
             slice = Tile.board.getCol(pos);
         foreach(Tile t in slice)
         {
-            t.slide(dir, 0.3f);
+            t.slide(dir, nudge_dist);
         }
+
+        
+
     }
 
     public void OnExitHover()
@@ -71,7 +86,7 @@ public class Inserter : MonoBehaviour
             slice = Tile.board.getCol(pos);
         foreach (Tile t in slice)
         {
-            t.slide(dir, -0.3f);
+            t.slide(dir, -nudge_dist);
         }
     }
 }
