@@ -14,12 +14,6 @@ public class GM : MonoBehaviour
             gm = this;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     List<Player> players;
     void createPlayers()
     {
@@ -38,17 +32,10 @@ public class GM : MonoBehaviour
         Tile.board.getTile(Tile.board.size - 1, 0).players.Add(players[3]);
     }
 
-    public int active_player = 0;
-    void turnLoop()
-    {
-        while(true)
-        {
-            active_player = (active_player+1)%4;
-            //if(player.treasure_count == 0)
-            //{
-            //  break;
-            //}
-        }
 
-    }
+
+
+    public int active_player = 0;
+    public bool placing_tile = true;
+    
 }

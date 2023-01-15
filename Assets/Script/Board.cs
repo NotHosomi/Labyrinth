@@ -49,7 +49,7 @@ public class Board : MonoBehaviour
 
         extraTile = randomTile();
         extraTile.transform.position = new Vector3(-2.5f, 4.5f, 0);
-        extraTile.transform.localScale = new Vector3(2f, 2f, 0);
+        extraTile.transform.localScale = new Vector3(2f, 2f, 1);
     }
 
     int L_count = 12;
@@ -162,12 +162,22 @@ public class Board : MonoBehaviour
 
     public void insertDown(int col)
     {
-        int endindex = getIndexFromPos(col, 0);
-        Tile buffer = tiles[endindex];
-        for (int i = getIndexFromPos(col, 0); i > getIndexFromPos(col, size - 1); i += size)
+        Tile buffer = tiles[getIndexFromPos(col, 0)];
+        for (int i = getIndexFromPos(col, 0); i < getIndexFromPos(col, size-1); ++i)
         {
-            tiles[i] = tiles[i + size];
+            tiles[i] = tiles[i + 1];
         }
+        extraTile.transform.position = new Vector3(col, 6.7f, 0);
+        extraTile.transform.localScale = new Vector3(1, 1, 1);
+        tiles[getIndexFromPos(col, size-1)] = extraTile;
+        extraTile = buffer;
+
+        List<Tile> slice = getRow(col);
+        foreach (Tile t in slice)
+        {
+            t.slide(2, 0.7f);
+        }
+        extraTile.exitSlide(2);
 
         // foreach p in players
         //   Vector3 pos = p.transform.position
@@ -175,24 +185,69 @@ public class Board : MonoBehaviour
         //      pos.y = 6
         //   p.transform.position = pos;
     }
+    public void insertUp(int col)
+    {
+        Tile buffer = tiles[getIndexFromPos(col, size - 1)];
+        for (int i = getIndexFromPos(col, size-1); i > getIndexFromPos(col, 0); --i)
+        {
+            tiles[i] = tiles[i - 1];
+        }
+        extraTile.transform.position = new Vector3(col, -0.7f, 0);
+        extraTile.transform.localScale = new Vector3(1, 1, 1);
+        tiles[getIndexFromPos(col, 0)] = extraTile;
+        extraTile = buffer;
+
+        List<Tile> slice = getRow(col);
+        foreach (Tile t in slice)
+        {
+            t.slide(0, 0.7f);
+        }
+        extraTile.exitSlide(0);
+    }
     public void insertRight(int row)
     {
-        int endindex = getIndexFromPos(size-1, row);
-        Tile buffer = tiles[endindex];
+        Tile buffer = tiles[getIndexFromPos(size - 1, row)];
         for (int i = getIndexFromPos(size - 1, row); i > getIndexFromPos(0, row); --i)
         {
             tiles[i] = tiles[i -1];
         }
         extraTile.transform.position = new Vector3(-0.7f, row, 0);
+        extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(0, row)] = extraTile;
         extraTile = buffer;
 
         List<Tile> slice = getRow(row);
         foreach (Tile t in slice)
         {
-            t.slide(1, 0.3f);
+            t.slide(1, 0.7f);
         }
         extraTile.exitSlide(1);
+
+        // foreach p in players
+        //   Vector3 pos = p.transform.position
+        //   if(pos.x == 7)
+        //      pos.x = 0
+        //   p.transform.position = pos;
+    }
+
+    public void insertLeft(int row)
+    {
+        Tile buffer = tiles[getIndexFromPos(0, row)];
+        for (int i = getIndexFromPos(0, row); i < getIndexFromPos(size - 1, row); ++i)
+        {
+            tiles[i] = tiles[i + 1];
+        }
+        extraTile.transform.position = new Vector3(6.7f, row, 0);
+        extraTile.transform.localScale = new Vector3(1, 1, 1);
+        tiles[getIndexFromPos(size - 1, row)] = extraTile;
+        extraTile = buffer;
+
+        List<Tile> slice = getRow(row);
+        foreach (Tile t in slice)
+        {
+            t.slide(3, 0.7f);
+        }
+        extraTile.exitSlide(3);
 
         // foreach p in players
         //   Vector3 pos = p.transform.position

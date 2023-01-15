@@ -13,7 +13,7 @@ public class Tile : MonoBehaviour
 
     public void Awake()
     {
-        player = new List<Player>();
+        players = new List<Player>();
     }
 
     public void init(char type)
@@ -105,16 +105,16 @@ public class Tile : MonoBehaviour
         switch (dir)
         {
             case 0:
-                pos.y += 1;
+                pos.y += 0.7f;
                 break;
             case 1:
-                pos.x += 1;
+                pos.x += 0.7f;
                 break;
             case 2:
-                pos.y -= 1;
+                pos.y -= 0.7f;
                 break;
             case 3:
-                pos.x -= 1;
+                pos.x -= 0.7f;
                 break;
         }
         transform.position = pos;
