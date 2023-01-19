@@ -10,6 +10,7 @@ public class Inserter : MonoBehaviour
     [SerializeField] int pos;
     public bool disabled;
     [SerializeField] Inserter opposite;
+    public static Inserter last;
 
     public static Inserter current_inactive = null;
     public static List<Inserter> inserters;
@@ -33,6 +34,7 @@ public class Inserter : MonoBehaviour
             current_inactive.GetComponent<Image>().color = Color.red;
         }
         current_inactive = opposite;
+        GetComponent<Image>().color = Color.red * 0.8f;
 
         switch (dir)
         {
@@ -49,9 +51,7 @@ public class Inserter : MonoBehaviour
                 Tile.board.insertLeft(Mathf.RoundToInt(transform.position.y));
                 break;
         }
-
-        foreach (Inserter i in inserters)
-            i.disabled = true;
+        last = this;
         GM.gm.onTilePlace();
     }
 
@@ -70,7 +70,7 @@ public class Inserter : MonoBehaviour
             t.slide(dir, nudge_dist);
         }
 
-        
+        GetComponent<Image>().color = Color.red;
 
     }
 
@@ -88,5 +88,6 @@ public class Inserter : MonoBehaviour
         {
             t.slide(dir, -nudge_dist);
         }
+        GetComponent<Image>().color = Color.red * 0.8f;
     }
 }

@@ -8,6 +8,7 @@ public class Board : MonoBehaviour
     [SerializeField] GameObject prefabL;
     [SerializeField] GameObject prefabR;
     [SerializeField] GameObject prefabT;
+    [SerializeField] GameObject overlay;
     public int size = 7;
     public int size2 = 49;
     Tile extraTile;
@@ -23,6 +24,7 @@ public class Board : MonoBehaviour
                 continue;
             tiles[i] = randomTile();
             tiles[i].transform.position = getPosFromIndex(i);
+            Instantiate(overlay, tiles[i].transform, false).GetComponent<SpriteRenderer>();
         }
         // row 0
         tiles[0] = newTile('r', 0, 0, 1);
@@ -116,7 +118,9 @@ public class Board : MonoBehaviour
     }
     public Tile getTile(int x, int y)
     {
-        return null;
+        if(x < 0 || x >= size || y < 0 || y >= size)
+            return null;
+        return tiles[getIndexFromPos(x,y)];
     }
     Vector2 getPosFromIndex(int i)
     {
@@ -171,6 +175,16 @@ public class Board : MonoBehaviour
         extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(col, size-1)] = extraTile;
         extraTile = buffer;
+        for (int i = 0; i < extraTile.players.Count; ++i)
+        {
+            Vector3 pos = extraTile.players[0].transform.position;
+            if (pos.y < 0)
+            {
+                pos.y = size - 1;
+                extraTile.players[0].place(pos);
+            }
+            Debug.Log("Pos: " + pos);
+        }
 
         List<Tile> slice = getCol(col);
         foreach (Tile t in slice)
@@ -178,12 +192,6 @@ public class Board : MonoBehaviour
             t.slide(2, 1 - Inserter.nudge_dist);
         }
         extraTile.exitSlide(2);
-
-        // foreach p in players
-        //   Vector3 pos = p.transform.position
-        //   if(pos.y == -1)
-        //      pos.y = 6
-        //   p.transform.position = pos;
     }
     public void insertUp(int col)
     {
@@ -197,6 +205,15 @@ public class Board : MonoBehaviour
         extraTile.transform.localScale = new Vector3(1, 1, 1);
         tiles[getIndexFromPos(col, 0)] = extraTile;
         extraTile = buffer;
+        for (int i = 0; i < extraTile.players.Count; ++i)
+        {
+            Vector3 pos = extraTile.players[0].transform.position;
+            if (pos.y >= size)
+            {
+                pos.y = 0;
+                extraTile.players[0].place(pos);
+            }
+        }
 
         List<Tile> slice = getCol(col);
         foreach (Tile t in slice)
@@ -224,12 +241,6 @@ public class Board : MonoBehaviour
             t.slide(1, 1 - Inserter.nudge_dist);
         }
         extraTile.exitSlide(1);
-
-        // foreach p in players
-        //   Vector3 pos = p.transform.position
-        //   if(pos.x == 7)
-        //      pos.x = 0
-        //   p.transform.position = pos;
     }
 
     public void insertLeft(int row)
@@ -244,6 +255,7 @@ public class Board : MonoBehaviour
         tiles[getIndexFromPos(size - 1, row)] = extraTile;
         extraTile = buffer;
 
+
         List<Tile> slice = getRow(row);
         foreach (Tile t in slice)
         {
@@ -251,15 +263,11 @@ public class Board : MonoBehaviour
         }
         extraTile.exitSlide(3);
 
-        // foreach p in players
-        //   Vector3 pos = p.transform.position
-        //   if(pos.x == 7)
-        //      pos.x = 0
-        //   p.transform.position = pos;
     }
 
     public List<Tile> pathable;
-    public void navReset(Tile origin)
+    // Returns false if the player cannot move
+    public bool navReset(Tile origin)
     {
         List<Tile> pathable = new List<Tile>();
         foreach (Tile t in tiles)
@@ -276,6 +284,24 @@ public class Board : MonoBehaviour
             if (t.navigable)
                 pathable.Add(t);
         }
+        if (pathable.Count == 1)
+            return false;
+        return true;
     }
 
+    public void greyOut()
+    {
+        foreach(Tile t in tiles)
+        {
+            if(!t.navigable)
+                t.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.5f);
+        }
+    }
+    public void resetCol()
+    {
+        foreach (Tile t in tiles)
+        {
+            t.GetComponent<SpriteRenderer>().color = Color.white;
+        }
+    }
 }

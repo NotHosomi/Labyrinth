@@ -6,13 +6,14 @@ public class Tile : MonoBehaviour
 {
     public static Board board;
     public bool[] connections; // NESW
+    public int treasure_id;
 
-    public List<Player> players;
+    public List<Player> players = new List<Player>();
     // Treasure treasure;
 
     public void Awake()
     {
-        players = new List<Player>();
+        //players = new List<Player>();
     }
 
     public void init(char type)
@@ -121,6 +122,42 @@ public class Tile : MonoBehaviour
         foreach(Player p in players)
             p.transform.position = pos;
 
+        // yield return wait
+
         // TODO: go to player's tray
+        //Vector2 tray_loc;
+        //switch(GM.gm.getActiveIndex)
+        //{
+        //    default: tray_loc = 
+        //        break;
+        //    case 1:
+        //    case 2:
+        //    case 3:
+        //}
+        //transform.position = tray_loc;
+
+        transform.position = new Vector3(-2.5f, 3, 0);
+        transform.localScale = new Vector3(2, 2, 0);
+        for (int i = 0; i < players.Count; ++i)
+        {
+            pos = players[0].transform.position;
+            switch(dir)
+            {
+                case 1:
+                    if (pos.x >= board.size)
+                    {
+                        pos.x = 0;
+                        players[0].place(pos);
+                    }
+                    break;
+                case 3:
+                    if (pos.x < 0)
+                    {
+                        pos.x = size - 1;
+                        extraTile.players[0].place(pos);
+                    }
+                    break;
+            }
+        }
     }
 }
