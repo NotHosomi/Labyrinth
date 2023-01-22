@@ -96,5 +96,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   connections: 01000100
+  treasure_id: -1
+  players: []
   navigable: 0
   nav_checked: 0

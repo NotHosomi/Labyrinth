@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class GM : MonoBehaviour
 {
@@ -32,6 +33,9 @@ public class GM : MonoBehaviour
     private void Start()
     {
         createPlayers();
+        Treasure._i.instatiateTreasures(ref players);
+        Board._i.init();
+        initPlayers();
     }
 
     List<Player> players;
@@ -42,17 +46,20 @@ public class GM : MonoBehaviour
         {
             players.Add(Instantiate(player_prefab).GetComponent<Player>());
         }
-        switch(player_count)
+    }
+    void initPlayers()
+    {
+        switch (player_count)
         {
             case 4:
-                players[3].init(new Vector2(0, Tile.board.size - 1), player_cols[3], 1);
+                players[3].init(new Vector2(0, Board.size - 1), player_cols[3], 1);
                 goto case 3;
             case 3:
                 players[2].init(new Vector2(0, 0), player_cols[2], 0);
                 break;
         }
-        players[1].init(new Vector2(Tile.board.size - 1, 0), player_cols[1], 3);
-        players[0].init(new Vector2(Tile.board.size - 1, Tile.board.size - 1), player_cols[0], 2);
+        players[1].init(new Vector2(Board.size - 1, 0), player_cols[1], 3);
+        players[0].init(new Vector2(Board.size - 1, Board.size - 1), player_cols[0], 2);
         //if(player_count > )
     }
 
@@ -60,13 +67,13 @@ public class GM : MonoBehaviour
     public void onTilePlace()
     {
         // prep movement
-        bool can_move = Tile.board.navReset(players[active_player].current_tile);
+        bool can_move = Board._i.navReset(players[active_player].current_tile);
         if (can_move)
         {
             move_stage = true;
             foreach (Inserter i in Inserter.inserters)
                 i.disabled = true;
-            Tile.board.greyOut();
+            Board._i.greyOut();
         }
         else
         {
@@ -80,7 +87,7 @@ public class GM : MonoBehaviour
         if(Input.GetMouseButtonDown(0) && move_stage)
         {
             Vector2 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Tile target = Tile.board.getTile(pos);
+            Tile target = Board._i.getTile(pos);
             if (target != null && target.navigable)
             {
                 players[active_player].place(target.transform.position);
@@ -98,7 +105,7 @@ public class GM : MonoBehaviour
         foreach (Inserter i in Inserter.inserters)
             i.disabled = false;
         Inserter.current_inactive.disabled = true;
-        Tile.board.resetCol();
+        Board._i.resetCol();
 
         Color bg = player_cols[active_player] * 0.3f;
         for (int i = 0; i < 3; ++i)
@@ -107,11 +114,4 @@ public class GM : MonoBehaviour
         bg.a = 255;
         Camera.main.backgroundColor = bg;
     }
-
-
-
-    // ================
-    // Treasure Manager
-    // ================
-    //void createTreasures()
 }

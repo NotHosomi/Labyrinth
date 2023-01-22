@@ -4,28 +4,25 @@ using UnityEngine;
 
 public class Board : MonoBehaviour
 {
-    public static Board instance;
+    public static Board _i;
     [SerializeField] GameObject prefabL;
     [SerializeField] GameObject prefabR;
     [SerializeField] GameObject prefabT;
     [SerializeField] GameObject overlay;
-    public int size = 7;
-    public int size2 = 49;
+    public const int size = 7;
+    public const int size2 = 49;
     Tile extraTile;
     Tile[] tiles;
 
     void Awake()
     {
         Tile.board = this;
+        _i = this;
+    }
+
+    public void init()
+    {
         tiles = new Tile[size2];
-        for(int i = 0; i < size2; ++i)
-        {
-            if (i % (2 * size) < size && i % 2 == 0)
-                continue;
-            tiles[i] = randomTile();
-            tiles[i].transform.position = getPosFromIndex(i);
-            Instantiate(overlay, tiles[i].transform, false).GetComponent<SpriteRenderer>();
-        }
         // row 0
         tiles[0] = newTile('r', 0, 0, 1);
         tiles[2] = newTile('T', 2, 0, 1);
@@ -46,6 +43,14 @@ public class Board : MonoBehaviour
         tiles[44] = newTile('T', 2, 6, 3);
         tiles[46] = newTile('T', 4, 6, 3);
         tiles[48] = newTile('r', 6, 6, 3);
+        for (int i = 0; i < size2; ++i)
+        {
+            if (i % (2 * size) < size && i % 2 == 0)
+                continue;
+            tiles[i] = randomTile();
+            tiles[i].transform.position = getPosFromIndex(i);
+            Instantiate(overlay, tiles[i].transform, false).GetComponent<SpriteRenderer>();
+        }
 
 
 
@@ -57,6 +62,8 @@ public class Board : MonoBehaviour
     int L_count = 12;
     int R_count = 16;
     int T_count = 6;
+    int treasure_counter = size2 / 4;
+    int non_treasure_counter = size2 / 2;
     Tile randomTile()
     {
         Tile t;
@@ -80,6 +87,18 @@ public class Board : MonoBehaviour
             t.rotate(rot);
             --T_count;
         }
+
+        roll = Random.Range(0, treasure_counter + non_treasure_counter);
+        if (roll < treasure_counter)
+        {
+            Treasure._i.placeTreasure(t);
+            --treasure_counter;
+        }
+        else
+            --non_treasure_counter;
+        if (non_treasure_counter < 0 || treasure_counter < 0)
+            Debug.Log("aa");
+
         return t;
     }
 
@@ -100,6 +119,10 @@ public class Board : MonoBehaviour
         }
         t.rotate(rot);
         t.transform.position = new Vector2(x, y);
+
+        if (type != 'r')
+            Treasure._i.placeTreasure(t);
+
         return t;
     }
 
@@ -199,7 +222,6 @@ public class Board : MonoBehaviour
         for (int i = getIndexFromPos(col, size-1); i > getIndexFromPos(col, 0); i -= size)
         {
             tiles[i] = tiles[i - size];
-            Debug.Log("i=" + i + " " + getPosFromIndex(i));
         }
         extraTile.transform.position = new Vector3(col, -1 + Inserter.nudge_dist, 0);
         extraTile.transform.localScale = new Vector3(1, 1, 1);

@@ -6,7 +6,7 @@ public class Tile : MonoBehaviour
 {
     public static Board board;
     public bool[] connections; // NESW
-    public int treasure_id;
+    public int treasure_id = -1;
 
     public List<Player> players = new List<Player>();
     // Treasure treasure;
@@ -51,6 +51,8 @@ public class Tile : MonoBehaviour
         rot.z += 90 * times;
         quat.eulerAngles = rot;
         transform.rotation = quat;
+        if(treasure_id != -1)
+            transform.Find("treasure").rotation = Quaternion.identity;
     }
 
     public bool navigable = false;
@@ -99,6 +101,9 @@ public class Tile : MonoBehaviour
                 break;
         }
         transform.position = pos;
+        if (treasure_id != -1)
+            transform.Find("treasure").rotation = Quaternion.identity;
+
     }
     public void exitSlide(int dir)//, int newPlayer)
     {
@@ -117,6 +122,7 @@ public class Tile : MonoBehaviour
             case 3:
                 pos.x -= 0.7f;
                 break;
+            default: throw new System.Exception("Invalid exitSlide dir");
         }
         transform.position = pos;
         foreach(Player p in players)
@@ -136,28 +142,33 @@ public class Tile : MonoBehaviour
         //}
         //transform.position = tray_loc;
 
-        transform.position = new Vector3(-2.5f, 3, 0);
-        transform.localScale = new Vector3(2, 2, 0);
-        for (int i = 0; i < players.Count; ++i)
+        for (;players.Count > 0;)
         {
             pos = players[0].transform.position;
             switch(dir)
             {
                 case 1:
-                    if (pos.x >= board.size)
-                    {
-                        pos.x = 0;
-                        players[0].place(pos);
-                    }
+                    pos.x = 0;
+                    players[0].place(pos);
                     break;
                 case 3:
-                    if (pos.x < 0)
-                    {
-                        pos.x = size - 1;
-                        extraTile.players[0].place(pos);
-                    }
+                    pos.x = Board.size - 1;
+                    players[0].place(pos);
                     break;
+                case 0:
+                    pos.y = 0;
+                    players[0].place(pos);
+                    break;
+                case 2:
+                    pos.y = Board.size - 1;
+                    players[0].place(pos);
+                    break;
+                default: throw new System.Exception("Invalid exitSlide dir");
             }
         }
+        transform.position = new Vector3(-2.5f, 2.5f, 0);
+        transform.localScale = new Vector3(2, 2, 0);
+        if (treasure_id != -1)
+            transform.Find("treasure").rotation = Quaternion.identity;
     }
 }
